@@ -1,0 +1,149 @@
+body {
+    padding-top:50px;
+    font-size:17px;
+}
+
+#masthead {
+    min-height:270px;
+    background-color:#48055B;
+    color:#C6AACD;
+}
+
+#masthead h1 {
+    font-size: 55px;
+    line-height: 1;
+}
+
+#masthead .well {
+    margin-top:13%;
+    background-color:#521D6C;
+    border-color:#3F0150;
+}
+
+.icon-bar {
+    background-color:#fff;
+}
+
+@media screen and (min-width: 768px) {
+    #masthead h1 {
+        font-size: 70px;
+    }
+}
+
+.mybar{
+    margin-top: 20px;
+}
+
+@media screen and (min-width: 768px) {
+    .mybar{
+        position: fixed;
+    }
+}
+
+.navbar-bright {
+    background-color:#521D6C;
+    color:#fff;
+}
+  
+.navbar-bright a, #masthead a, #masthead .lead {
+    color:#C6AACD;
+}
+
+.navbar-bright li > a:visited {
+    background-color:#7B5086;
+}
+
+.navbar-bright li > a:hover {
+    background-color:#3F0150;
+}
+
+.nav-stacked li.active {
+    border: 0 #9154A2 solid !important;
+    border-right-width: 4px !important;
+}
+
+
+.affix-top,.affix{
+    position: static;
+}
+
+@media (min-width: 979px) {
+    #sidebar.affix-top {
+        position: static;
+        margin-top:30px;
+        width:228px;
+    }
+  
+    #sidebar.affix {
+        position: fixed;
+        top:70px;
+        width:228px;
+    }
+}
+
+#sidebar li.active {
+    border:0 #eee solid;
+    border-right-width:4px;
+}
+
+#mainCol h2 {
+    padding-top: 55px;
+    margin-top: -55px;
+    font-size:   40px;
+}
+
+#mainCol h3 {
+    padding-top: 55px;
+    margin-top: -55px;
+}
+
+.subsection {
+    margin-left: 20px;
+    font-size: 15px;
+}
+
+.console-custom {
+    color: #AC58FA;
+}
+
+.console-highlight {
+    border-radius: 5px;
+    background: #F5F6CE;
+}
+
+pre {
+    margin: 15px;
+    -webkit-box-shadow: 5px 5px 5px #888888;  /* Safari 3-4, iOS 4.0.2 - 4.2, Android 2.3+ */
+    -moz-box-shadow:    5px 5px 5px #888888;  /* Firefox 3.5 - 3.6 */
+    box-shadow:         5px 5px 5px #888888;
+}
+
+.popover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1060;
+  display: none;
+  max-width: 276px;
+  padding: 1px;
+  text-align: left;
+  white-space: normal;
+  background-color: #fff;
+  -webkit-background-clip: padding-box;
+          background-clip: padding-box;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, .2);
+  border-radius: 6px;
+  -webkit-box-shadow: 0 5px 10px black;
+          box-shadow: 0 5px 10px black;
+}
+
+.popover-content {
+    background-color: #FCFCFC;
+}
+
+.panel {
+    -webkit-box-shadow: 5px 5px 5px #888888;  /* Safari 3-4, iOS 4.0.2 - 4.2, Android 2.3+ */
+    -moz-box-shadow:    5px 5px 5px #888888;  /* Firefox 3.5 - 3.6 */
+    box-shadow:         5px 5px 5px #888888;
+}

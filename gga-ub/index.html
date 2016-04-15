@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Generic Group Analyzer Unbounded</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+    });
+  </script>
+  <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+</head>
+
+<body class="body">
+
+<header class="navbar navbar-bright navbar-fixed-top" role="banner">
+  <div class="container">
+    <div class="navbar-header">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+    </div>
+    <nav class="collapse navbar-collapse" role="navigation">
+      <ul class="nav navbar-nav">
+        <li>
+          <a href="index.html">Get Started</a>
+        </li>
+        <li>
+          <a href="documentation.html">Documentation</a>
+        </li>
+        <li>
+          <a href="#">About</a>
+        </li>
+        <li>
+          <a href="#">Contact</a>
+        </li>
+        <li>
+          <a href="https://github.com/generic-group-analyzer/gga-unbounded" target="_blank">GitHub</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div id="masthead">  
+  <div class="container">
+      <div class="row">
+        <div class="col-md-8">
+          <h1>Generic Group Analyzer Unbounded
+            <p class="lead">"Do it unbounded"</p>
+          </h1>
+        </div>
+        <div class="col-md-4">
+          <div class="row">
+            <div class="col-sm-12" style="margin-top:20px">
+              <img id="infty" src="img/infty.png" class="img-responsive"
+                   onmouseover="rotation(this,0,1)" onmouseout="rotation(this,0,-1)">
+            </div>
+          </div>
+        </div>
+      </div> 
+  </div><!-- /cont -->
+</div>
+
+<!-- Begin Body -->
+<div class="container">
+  <div class="row">
+    <div class="col-md-3" id="leftCol">
+
+      <ul class="nav nav-stacked" id="sidebar">
+        <li><a href="#sec0">Introduction</a></li>
+        <li><a href="#sec1"><span class="subsection">Example</span></a></li>
+        <li><a href="#sec2">Installation</a></li>
+        <li><a href="#sec3">Usage</a></li>
+        <li><a href="#sec4"><span class="subsection">Input files</span></a></li>
+        <li><a href="#sec5"><span class="subsection">Automated mode</span></a></li>
+        <li><a href="#sec6"><span class="subsection">Interactive mode</span></a></li>
+      </ul>
+              
+    </div>  
+    <div class="col-md-9" id="mainCol">
+              
+      <br>
+              
+      <h2 id="sec0">Introduction</h2>
+      <br>
+      Generic Group Analyzer Unbounded is a tool to automatically prove computational security statements in the
+      <a href="https://en.wikipedia.org/wiki/Generic_group_model" target="_blank">Generic Group Model</a>.
+      It is especially designed to deal with security experiments where the attacker is allowed to interact with
+      an Oracle an <b>unbounded</b> number of times and this interaction may be adaptive, i.e., new queries can depend
+      on earlier Oracle responses.
+      <br><br>
+      This overcomes previous tools like the Generic Group Analyzer (Crypto 2014),
+      paper available at <a href="http://eprint.iacr.org/2014/458" target="_blank">http://eprint.iacr.org/2014/458</a>, 
+      which cannot deal with adaptive adversaries; or its extension (PKC 2015), whose paper is available at
+      <a href="http://eprint.iacr.org/2015/019" target="_blank">http://eprint.iacr.org/2015/019</a> and it only deals
+      with experiments where the number of queries is fixed.
+      <hr class="col-md-12">
+      <br>
+      The tool focuses on <a href="https://en.wikipedia.org/wiki/Pairing-based_cryptography" target="_blank">pairing-based</a>
+      cryptographic constructions, in particular, on schemes defined over bilinear groups.
+      <br>A bilinear group is a tupple $(p, \mathbb{G}_{1}, \mathbb{G}_{2}, \mathbb{G}_{T}, g_{1}, g_{2}, e)$ where,
+      <ul>
+        <li>$p$ is a prime number,</li>
+        <li>$\mathbb{G}_{1}, \mathbb{G}_{2}, \mathbb{G}_{T}$ are cyclic groups of prime order $p$,</li>
+        <li>$g_{1}$ is a generator of $\mathbb{G}_{1}$ and $g_{2}$ is a generator of $\mathbb{G}_{2}$,</li>
+        <li>$e$, known as the pairing, is an efficiently computable map
+          $e: \mathbb{G}_{1} \times \mathbb{G}_{2} \rightarrow \mathbb{G}_{T}$,
+         that satisfies the bilinear property:
+          $$\forall a,b \in \mathbb{Z}_{p}, \ e(g_{1}^{a}, g_{2}^{b}) = e(g_{1},g_{2})^{ab}$$
+         and it is non-degenerate, i.e, $e(g_{1},g_{2})$ is a generator of $\mathbb{G}_{T}$.
+        </li>
+      </ul>
+      <br>
+      Therefore, the tool can be used to analyze the generic security of:
+      <ul>
+        <li>Structure-Preserving Signatures (signature schemes defined over bilinear groups where the messages and
+          signatures consist of group elements and the verification of signatures consists of evaluation pairing
+          product equations).
+        </li>
+        <li> Algebraic Message-Authentication Codes.</li>
+        <li> Assumptions.</li>
+      </ul>
+      and more cryptographic construction defined over bilinear groups whose security is defined as
+      a computational experiment.
+      
+      <div style="margin: 20px">
+        <h3 id="sec1">Example</h3>
+        This is an example of a cryptographic construction that can be analyzed with the tool. It is taken from
+        the AsiaCrypt 2015 paper, <a href="https://eprint.iacr.org/2014/635" target="_blank">https://eprint.iacr.org/2014/635</a>, by S. Chatterjee and
+        A. Menezes:
+
+        <div class="panel panel-default" style="margin: 30px">
+          <div class="panel-heading">
+            <h4>Re-randomizable Structure-Preserving Signature scheme in Type III</h4>
+          </div>
+          <div class="panel-body">
+            <ul>
+              <li>
+                <b>Setup ${\cal P}(1^{\lambda})$</b>:<br>
+                Return $\mathit{PP} = (p, \mathbb{G}_{1}, \mathbb{G}_{2}, \mathbb{G}_{T}, g_{1}, g_{2}, e) \leftarrow
+                {\cal G}(1^{\lambda})$, where ${\cal G}$ is an efficient algorithm that on input $1^{\lambda}$ outputs
+                a description of a bilinear group in Type III, with groups of order $p$ for a $\lambda$-bit prime $p$.
+              </li><br>
+              <li>
+                <b>Key generation ${\cal K}(\mathit{PP})$</b>:<br>
+                Choose $v,w \stackrel{\$}{\leftarrow} \mathbb{Z}_{p}^{*}$ and compute $\mathit{VK} =
+                (\mathit{PP}, V, W)$ and $\mathit{SK} = (\mathit{PP}, v, w)$ as
+                $$ V \leftarrow g_{1}^{v} \ \text{ and } \ W \leftarrow g_{1}^{w}$$
+              </li>
+              <li>
+                <b>Signing ${\cal S}_{\mathit{SK}}(M)$</b>:<br>
+                For $M \in \mathbb{G}_{2}$, choose $r \stackrel{\$}{\leftarrow} \mathbb{Z}_{p}^{*}$ and compute
+                the signature $(T_{1},T_{2},S) \in \mathbb{G}_{1}\times \mathbb{G}_{2}^{2}$ as
+                $$ T_{1} \leftarrow g_{1}^{r}, \ \ \ \ \ T_{2} \leftarrow g_{2}^{r}, \ \ \ \text{ and } \ \ \
+                   S \leftarrow M^{v} \cdot g_{2}^{w} \cdot g_{2}^{r^2}
+                $$
+              </li>
+              <li>
+                <b>Verification ${\cal V}_{\mathit{VK}}(M, (T_{1},T_{2},S))$</b>:<br>
+                Accept if and only if $T_{1} \in \mathbb{G}_{1}$, $M,T_{2},S \in \mathbb{G}_{2}$ and
+                $$e(g_{1}, S) = e(V,M) \cdot e(W,g_{2}) \cdot e(T_{1}, T_{2}) \ \ \land \ \ \
+                  e(T_{1}, g_{2}) = e(g_{1}, T_{2})
+                $$
+              </li>
+            </ul>
+          </div>
+          <div class="panel-footer">Note that we use multiplicative notation for $\mathbb{G}_{1}$,
+            $\mathbb{G}_{2}$ and $\mathbb{G}_{T}$.
+          </div>
+        </div>
+
+        A possible notion of security for a signature scheme is the <i>Existential Unforgeability Against Chosen
+          Message Attacks</i>. We say that a signature scheme $({\cal P}, {\cal K}, {\cal S}, {\cal V})$ is EUF-CMA secure
+        if for all polynomial time algorithms ${\cal A}$,
+        $$
+          \mathit{Pr}\left[
+          \begin{array}{ll}
+            \mathit{PP} \leftarrow {\cal P}(1^{\lambda}) & \\
+            (\mathit{VK}, \mathit{SK}) \leftarrow {\cal K}(\mathit{PP}) & : M \not \in Q \ \land \
+               {\cal V}_{\mathit{VK}}(M,\Sigma) = 1 \\
+            (M,\Sigma) \leftarrow {\cal A}^{{\cal S}_{\mathit{SK}}(\cdot)}(\mathit{VK}) & \\
+          \end{array}
+          \right] \approx \mathit{negl}(\lambda)
+        $$
+        where $Q$ is the set of queries made by ${\cal A}$ to the signing oracle. Note that, since the adversary is
+        polynomial, $|Q| \approx \mathit{poly}(\lambda)$, but this cardinality is not bounded.
+        <br>
+        Intuitively, this notion says that:
+        <p style="margin:20px">
+          <i>There is no polynomial time adversary that can produce
+            a valid signature (with significant probability) on a message without the knowledge of the secret key,
+            even if she has access to a signing Oracle that produces valid signatures for messages of her choice.</i>
+        </p>
+        Note that the adversary must find a valid signature on a message that was not sent to the Oracle.
+
+      </div>
+
+      <hr>
+
+      <h2 id="sec2">Installation</h2>
+      <br>
+      <ol>
+        <li style="margin-bottom: 30px">
+          Install <a href="https://opam.ocaml.org/" target="_blank">Opam</a>.<br>
+          In Ubuntu,
+          <pre><code>apt-get install -y ocaml ocaml-native-compilers opam libtool libtool-bin libgmp-dev libffi-dev m4 libz-dev libssl-dev camlp4-extra</code></pre>
+          In OS X, use homebrew,
+          <pre><code>brew install opam</code></pre>
+        </li>
+        <li style="margin-bottom: 30px">
+          Install the right compiler and the right libraries:
+<pre><code>opam pin add gga-unbounded <span class="console-custom">GGA_UNBOUNDED_DIR</span> -n
+opam install gga-unbounded --deps-only</code></pre>
+        </li>
+        <li style="margin-bottom: 30px">
+          The tool uses <a href="http://www.sagemath.org/" target="_blank">Sage</a>,
+          <a href="http://pari.math.u-bordeaux.fr/" target="_blank">Pari/GP</a> and
+          <a href=" https://z3.codeplex.com/" target="_blank">Z3</a> as backend.
+          <ul>
+            <li>For Sage, you should be able to start <code>sage -python</code>. (We used SageMath, Version 6.8).</li>
+            <li>For Pari/GP, you need to be able to compile and link C code with libpari.
+              On Ubuntu, the package is named pari-gp and on OS X, you can install Pari/GP with homebrew.
+            </li>
+            <li>We use a Z3 wrapper written in Python. Visit the <a href="https://github.com/Z3Prover/z3" target="_blank">Z3 GitHub project</a>.</li>
+          </ul>
+        </li>
+	<li style="margin-bottom: 30px">
+	  Set the path variable:
+	  <pre><code>export UBT_PATH=<span class="console-custom">GGA_UNBOUNDED_DIR</span></code></pre>
+	</li>
+        <li style="margin-bottom: 30px">
+          To compile the tool use <code>make</code>. This will produce two executables:
+          <ul>
+            <li><b>ubt.native</b> to perform automated analysis.</li>
+            <li><b>wsubt.native</b> to communicate via web sockets with the interactive tool.</li>
+          </ul>
+        </li>
+        <li style="margin-bootom: 30px">(Interactive Mode)
+          The interactive mode uses <a href="https://www.mathjax.org/" target="_blank">MathJax</a>. You can install
+          it, by changing to the <i>web</i> directory, i.e., <code>cd web/</code> and running
+          <code>make get-mathjax</code>.
+        </li>
+      </ol>
+
+      <hr>
+      <h2 id="sec3">Usage</h2>
+      <div style="margin: 20px">
+        <h3 id="sec4">Input files</h3>
+        The description of the cryptographic construction and the security game is provided to the tool as an
+        input file. As an example, we present the input file <i>Chatterjee-Menezes.ubt</i> expressing the
+        Structure-Preserving Scheme described <a href="#sec1">above</a> and the EUC-CMA security experiment:
+<pre><code>group_setting 3.
+
+sample V,W.
+
+input [V,W] in G1.
+
+oracle o1(M:G2) =
+  sample R;
+  return [ R ] in G1,
+         [ R, M*V + R^2 + W] in G2.
+
+win (wM:G2, wR1:G1, wR2:G2, wS:G2) =
+    (forall i: wM <> M_i /\ wR1 = wR2 /\ wS = V*wM + wR1*wR2 + W).
+</code></pre>
+      </div>
+
+      <div style="margin: 20px">
+        <br>
+        <h3 id="sec5">Automated mode</h3>
+        You can use the automated algorithm by running, e.g.:
+        <pre><code>./ubt.native examples/Automatic/Chatterjee-Menezes.ubt</code></pre>
+        This will produce the following output,
+<pre><code>simplify.
+extract_coeffs.
+simplify.
+simplify.
+case_distinction p9_j'1.
+  simplify.
+  contradiction.
+simplify.
+divide_by_param p9_i'1.
+simplify.
+contradiction.
+Proven!
+Time 3.49 seconds
+</code></pre>
+      which corresponds to the sequence of commands that the automatic algorithm executed to prove
+      the security of the cryptographic scheme. Visit the <a href="documentation.html">Documentation</a>
+      section for details about these commands.
+      <br><br>
+      We note that there may be several ways to prove the statement,
+      i.e., several sequences of commands representing a valid proof. The automatic algorithm follows a
+      heuristic to apply the available rules, therefore, the produced result may not be the shortest or 
+      simplest existing proof.
+      </div>
+      <br>
+      <div style="margin: 20px">
+        <h3 id="sec6">Interactive mode</h3>
+        We provide an interactive web interface where you can execute commands while watching the
+        current state of the proof. This can be used to analyze given proofs or to produce customized ones.
+        <br><br>
+        To start the web interface, execute:
+        <pre><code>./wsubt.native examples/Interactive/Chatterjee-Menezes.ubt</code></pre>
+        and open the shown URL in your browser,
+<pre><code>Open the following URL in your browser (websocket support required):
+
+    <mark class="console-highlight">file:///<span class="console-custom">GGA_UNBOUNDED_DIR</span>/web/index.html</mark>
+
+Files: examples/Interactive/Chatterjee-Menezes.ubt</code></pre>
+        This is a screenshot of the interactive mode (click on the image to enlarge it):
+        <br><br>
+        <a href="#sec6" onClick="$('#myModal').modal('show');">
+          <img src="img/interactive.png" class="img-responsive img-rounded" alt="Interactive Mode Screenshot">
+        </a>
+        <br>
+        On the left side there is the code window, were you must define the security
+	experiment and you can execute commands. On the right you can see the equations associated with the current
+	state of the proof.
+	<br>
+        Visit the <a href="documentation.html">Documentation</a> section for details about how use the interactive mode.
+        <br>
+	<br>
+      </div>
+    </div>          
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog modal-lg" role="document" style="width: 90%">
+    <div class="modal-content">
+      <div class="modal-body" align="center">
+        <img src="img/interactive.png" class="img-responsive img-rounded" alt="Interactive Mode Screenshot">
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <script type="text/javascript" src="js/jquery-1.10.1.min.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="js/scripts.js"></script>
+</body>
+
+</html>

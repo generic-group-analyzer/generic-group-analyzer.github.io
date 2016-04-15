@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Generic Group Analyzer Unbounded</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+    });
+  </script>
+  <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+</head>
+
+<body class="body">
+
+<header class="navbar navbar-bright navbar-fixed-top" role="banner">
+  <div class="container">
+    <div class="navbar-header">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+    </div>
+    <nav class="collapse navbar-collapse" role="navigation">
+      <ul class="nav navbar-nav">
+        <li>
+          <a href="index.html">Get Started</a>
+        </li>
+        <li>
+          <a href="documentation.html">Documentation</a>
+        </li>
+        <li>
+          <a href="#">About</a>
+        </li>
+        <li>
+          <a href="#">Contact</a>
+        </li>
+        <li>
+          <a href="https://github.com/generic-group-analyzer/gga-unbounded" target="_blank">GitHub</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- Begin Body -->
+<div class="container">
+ <div class="row">
+    <div class="col-md-3" id="leftCol">
+      
+      <div class="mybar">
+        <ul class="nav nav-stacked">
+          <li><a href="documentation.html">Documentation</a></li>
+          <li><a href="chapter1.html">1. Example</a></li>
+          <li><a href="#">2. Specifying security<br>experiments</a></li>
+          <li><a href="#sec1"><span class="subsection">Group type</span></a></li>
+          <li><a href="#sec2"><span class="subsection">Adversary input</span></a></li>
+          <li><a href="#sec3"><span class="subsection">Oracle definition</span></a></li>
+          <li><a href="#sec4"><span class="subsection">Winning conditions</span></a></li>
+          <li><a href="chapter3.html">3. Proving security</a></li>
+          <!-- <li><a href="bibliography.html">Bibliography</a></li>-->
+        </ul>
+      </div>
+              
+    </div>  
+    <div class="col-md-9" id="mainCol">
+
+      <br>
+      <h2>2. Specifying security experiments</h2>
+      <br>
+      In this chapter we explain how to write <i>input files</i>. These files contain the description of
+      the cryptographic construction to be analyzed and also of the security notion that is taken into
+      account.
+      <br>
+      Usually, input files consist of four parts. The <span style="color: #FE9A2E">group type</span>,
+      the <span style="color: #AC58FA">adversary input</span>, the <span style="color: #0174DF">oracle definition</span>
+      and the <span style="color: #04B431">winning conditions</span>:
+      <pre style="font-weight: bold;"><code><span style="color: #FE9A2E;">group_setting 3.</span>
+
+<span style="color: #AC58FA">sample V,W.
+input [V,W] in G1.</span>
+
+<span style="color: #0174DF">oracle o1(M:G2) =
+  sample R;
+  return [ R ] in G1,
+         [ R, M*V + R^2 + W] in G2.</span>
+
+<span style="color: #04B431">win (wM:G2, wR1:G1, wR2:G2, wS:G2) =
+    (forall i: wM <> M_i /\ wR1 = wR2 /\ wS = V*wM + wR1*wR2 + W).</span>
+</code></pre>
+
+      <br>
+      <div style="margin: 20px">
+        <h3 id="sec1">Group type</h3>
+        The tool is designed to be used on cryptographic schemes defined over
+        <a href="https://en.wikipedia.org/wiki/Pairing-based_cryptography" target="_blank">bilinear groups</a>. You must
+        specify in your input file the group type where your construction is defined. There are three
+        different settings in a bilinear group:
+        <ul>
+          <li style="margin-top: 10px">
+            <b>Type I</b>: $\mathbb{G}_{1} = \mathbb{G}_{2}$.<br>
+            This is also known as the <i>symmetric setting</i>.
+            There is only one group, because the two groups are the same. This is the <b>default</b> setting if it is not
+            specified in the input file.
+          </li>
+          <li style="margin-top: 10px">
+            <b>Type II</b>: $\mathbb{G}_{1} \neq \mathbb{G}_{2}$, but there is an efficiently computable isomorphism
+            $\psi: \mathbb{G}_{2} \rightarrow \mathbb{G}_{1}$.<br>
+            This implies that from an element in $\mathbb{G}_{2}$, it should be easy to compute an element in
+            $\mathbb{G}_{1}$ with the same 
+            <span id="dlog" data-trigger="hover" data-toggle="popover" data-placement="top" style="color: #C762EF;"
+                  data-content="We assume the isomorphism relates the generators and thus, it preserves discrete
+                                logarithms.">
+              discrete logarithm
+            </span>.
+            On the other hand, it is supposed to be hard to compute $\psi^{-1}$, the inverse isomorphism.
+          </li>
+          <li style="margin-top: 10px">
+            <b>Type III</b>: $\mathbb{G}_{1} \neq \mathbb{G}_{2}$.<br>
+            This is also known as the <i>asymmetric setting</i>.
+            There is no efficiently computable isomorphism between $\mathbb{G}_{1}$ and $\mathbb{G}_{2}$. Although
+            this isomorphism exists (both groups have order $p$), it cannot be computed efficiently.
+          </li>
+        </ul>
+        To specify the group type, you must include the following line in the input file:
+        <pre><code>group_setting <span class="console-custom">n</span>.</code></pre>
+        where <i>n</i> must be replaced with <code>1</code>, <code>2</code> or <code>3</code>.
+      </div>
+      <br>
+      <div style="margin: 20px">
+        <h3 id="sec2">Adversary input</h3>
+        This part of the input file allows to define what is given to the adversary in the beginning of the
+        security game. Usually, we specify the public parameters and public keys in this part. The syntax is the following:
+        <pre><code>sample <span class="console-custom">V1</span>,<span class="console-custom">V2</span>,...,<span class="console-custom">Vk</span>.
+input [<span class="console-custom">P1</span>,<span class="console-custom">P2</span>,...,<span class="console-custom">Pm</span>] in G1,
+      [<span class="console-custom">Q1</span>,<span class="console-custom">Q2</span>,...,<span class="console-custom">Qn</span>] in G2.
+</code></pre>
+        The previous syntax represents the fact of sampling variables
+        $$V_1,\dots,V_k \stackrel{\$}{\leftarrow} \mathbb{Z}_{p}^{*}$$
+        and giving to the adversary access to elements
+        $$g_{1}^{P_1}, \dots, g_{1}^{P_m}, g_{2}^{Q_1}, \dots, g_{2}^{Q_n}$$
+        where $P_1,\dots,P_m,Q_1,\dots,Q_n$ are
+        <span id="dlog" data-trigger="hover" data-toggle="popover" data-placement="top" style="color: #C762EF;"
+              data-content="Polynomials that may include terms with negative degree.">
+          Laurent polynomials
+        </span>
+        over the previously defined variables $V_1,\dots,V_k$ with coefficients in $\mathbb{Z}_{p}$.
+        <ul>
+          <li style="margin-top:10px">
+            As variable names you can use arbitrarily long strings consisting of alphanumeric symbols:
+            <code>A-Z</code> + <code>a-z</code> + <code>0-9</code>
+          </li>
+          <li style="margin-top:10px">
+            To define polynomials you can use integers and variables, combined with symbols
+            <code> +  -  *  ^  (  )</code>.
+          </li>
+        </ul>
+        <br>
+        This part of the input file is not a requirement, you may define security experiments where no initial information is given to the
+        adversary.
+      </div>
+
+      <br>
+      <div style="margin: 20px">
+        <h3 id="sec3">Oracle definition</h3>
+        Here, we define the Oracle that the adversary can call in the security experiment. For instance, a Signing
+        Oracle when we analyze a Signature Scheme. For this we must define the Oracle input, the randomness defined
+        in the Oracle execution and the Oracle output. The syntax is the following:
+        <pre><code>oracle o<span class="console-custom">1</span>(<span class="console-custom">I1</span>:<span class="console-custom">S1</span>,...,<span class="console-custom">Ik</span>:<span class="console-custom">Sk</span>) = 
+  sample <span class="console-custom">R1</span>,...,<span class="console-custom">Rl</span>;
+  return [ <span class="console-custom">P1</span>,...,<span class="console-custom">Pm</span> ] in G1,
+         [ <span class="console-custom">Q1</span>,...,<span class="console-custom">Qn</span> ] in G2.
+</code></pre>
+        <ul>
+          <li style="margin-top:10px">
+            The
+            <span id="dlog" data-trigger="hover" data-toggle="popover" data-placement="top" style="color: #C762EF;"
+                  data-content="Although the current version of the tool has support for a single Oracle, it must have
+                                a name.">
+              oracle name
+            </span>
+            must start with <code>o</code> and can be followed by an arbitrary string, consisting of
+            alphanumeric characters:
+            <code>A-Z</code> + <code>a-z</code> + <code>0-9</code>
+          </li>
+          <li style="margin-top:10px">
+            The Oracle input is defined by a list of typed variables.<br>
+            Variables $I_{1},\dots,I_{k}$ are defined by alphanumeric strings, using:
+            <code>A-Z</code> + <code>a-z</code> + <code>0-9</code>
+            <br>
+            Every set $S_{1},\dots, S_{k}$ must be <code>G1</code>, <code>G2</code> or <code>Fp</code>,
+            corresponding to $\mathbb{G}_{1}$, $\mathbb{G}_{2}$ and $\mathbb{Z}_{p}$ respectively.
+          </li>
+          <li style="margin-top:10px">
+            For random variable names, $R_{1},\dots, R_{l}$, you can use strings consisting of alphanumeric symbols:
+            <code>A-Z</code> + <code>a-z</code> + <code>0-9</code>
+          </li>
+          <li style="margin-top:10px">
+            For output polynomials $P_{1},\dots,P_{m},Q_{1},\dots,Q_{n}$ you can use integers and previously defined
+            variables (either from the adversary input or Oracle random variables), combined with symbols
+            <code> +  -  *  ^  (  )</code>.
+          </li>
+        </ul>
+        The oracle definition is <b>required</b>. If your security experiment does not give Oracle access to the adversary
+        you can write:
+        <pre><code>oracle o1() =
+  return [ ] in G1.
+</code></pre>
+        As an example, the Oracle definition from above:
+        <pre><code>oracle o1(M:G2) =
+  sample R;
+  return [ R ] in G1,
+         [ R, M*V + R^2 + W] in G2.</code></pre>
+        Represents the fact that the adversary sends $M \in \mathbb{G}_{2}$ to the Oracle,
+        which samples a random variable $r \stackrel{\$}{\leftarrow} \mathbb{Z}_{p}$ and outputs
+        three group elements (a valid signature for $M$):
+        $$g_{1}^{r}, \ \ \ \ \ \ \ g_{2}^{r}, \ \ \ \ \ \ \ \text{ and } \ \ \ \ M^{v}\cdot g_{2}^{r^{2}} \cdot g_{2}^{w}$$
+      </div>
+      <br>
+      <div style="margin: 20px">
+        <h3 id="sec4">Winning conditions</h3>
+        Here, we define the security statements that should be reached by the adversary to win the game and thus,
+        if there is no way she can reach them, the security experiment is secure. The syntax is the following:
+        <pre><code>win (<span class="console-custom">F1</span>:<span class="console-custom">S1</span>,...,<span class="console-custom">Fk</span>:<span class="console-custom">Sk</span>) = 
+  ( <span class="console-custom">exp1</span>  /\  <span class="console-custom">exp2</span>  /\ ... /\ <span class="console-custom">expn</span> ).
+</code></pre>
+        where:
+        <ul>
+          <li style="margin-top:10px">
+            Elements $F_{1},\dots,F_{k}$ represent the forgery in the computational experiment.
+            You must specify the type $S_i$ (<code>G1</code>, <code>G2</code> or <code>Fp</code>)
+            of every forgery element $F_i$.
+          </li>
+          <li style="margin-top:10px">
+            The winning conditions are defined by a conjunction of expressions. Expression can be equalities
+            or inequalities and must have the following form:
+            <br>
+            <div class="row">
+              <div class="col-md-6">
+                <pre><code>forall <span class="console-custom">i1</span>,...,<span class="console-custom">ik</span>: <span class="console-custom">P</span> = <span class="console-custom">Q</span></code></pre>
+              </div>
+              <div class="col-md-6">
+                <pre><code>forall <span class="console-custom">i1</span>,...,<span class="console-custom">ik</span>: <span class="console-custom">P</span> <> <span class="console-custom">Q</span></code></pre>
+              </div>
+            </div>
+            <ul>
+              <li style="margin-top:10px">
+                $i_{1},\dots,i_{k}$ are index variables. You can define them using arbitrary alphanumeric strings where
+                the first symbol must be one of the following characters: <code>i</code>, <code>j</code>, <code>k</code>, <code>l</code>.
+                You can also define two index variables sharing the same name, with the <code>'</code> symbol.
+                The syntax is <code>name'n</code> where <i>n</i> must be an integer. For example,
+                <code>i'1</code> and <code>i'2</code> will share the name $i$ and will be printed in $\LaTeX{}$ form as $i_{1}$ and $i_{2}$.
+              </li>
+              <li style="margin-top:10px">
+                $P$ and $Q$ are Laurent polynomials with coefficient in $\mathbb{Z}_{p}$, over all previous variables: <i>adversary input variables</i>,
+                <i>forgery variables</i>, <i>oracle input variables</i> and <i>random variables</i> in the oracle. Variables, as explained above, are defined by 
+                alphanumeric strings. However, every oracle variable must be indexed (by a single index corresponding to the number of the
+                Oracle query that involves the variable). This is done with the <code>_</code> symbol. The syntax is <code>V_i</code>, where
+                V is the variable name and i is an index variable.
+                <br>
+                Additionally, $P$ and $Q$ may include summation terms. The syntax for a summation is:
+                <pre><code>(sum <span class="console-custom">i1</span>,...,<span class="console-custom">ik</span>: <span class="console-custom">M</span>)</code></pre>
+                where $i_{1},\dots,i_{k}$ are index variables and $M$ is a Laurent monomial.
+              </li>
+            </ul>
+            <br>
+            We note that, when the expression does not depend on index variables, the <code>forall</code>
+            token can be omitted and the expression becomes <code>P = Q</code> or <code>P <> Q</code>.
+          </li>
+        </ul>
+        These expressions allow us to express the conditions of the security experiment. For example,
+        to establish that the forgery must be on a new message, different from all messages sent to
+        the Oracle, we can write:
+        <pre><code>forall i: wM <> M_i</code></pre>
+      </div>
+      <br>
+      <br>
+      <div class="col-md-6">
+        <a href="chapter1.html">
+          <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+          1. Example
+        </a>
+      </div>
+      <div class="col-md-6" align="right">
+        <a href="chapter3.html">
+          3. Proving security
+          <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+        </a>
+      </div>
+      <br><br><br><br>
+
+    </div>
+</div>
+
+  <script type="text/javascript" src="js/jquery-1.10.1.min.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="js/scripts.js"></script>
+
+  <script>
+    $("[data-toggle=popover]")
+    .popover({html:true})
+  </script>
+
+</body>
+
+</html>

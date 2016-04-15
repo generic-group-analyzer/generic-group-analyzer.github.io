@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Generic Group Analyzer Unbounded</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+    });
+  </script>
+  <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+</head>
+
+<body class="body">
+
+<header class="navbar navbar-bright navbar-fixed-top" role="banner">
+  <div class="container">
+    <div class="navbar-header">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+    </div>
+    <nav class="collapse navbar-collapse" role="navigation">
+      <ul class="nav navbar-nav">
+        <li>
+          <a href="index.html">Get Started</a>
+        </li>
+        <li>
+          <a href="documentation.html">Documentation</a>
+        </li>
+        <li>
+          <a href="#">About</a>
+        </li>
+        <li>
+          <a href="#">Contact</a>
+        </li>
+        <li>
+          <a href="https://github.com/generic-group-analyzer/gga-unbounded" target="_blank">GitHub</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- Begin Body -->
+<div class="container">
+ <div class="row">
+    <div class="col-md-3" id="leftCol">
+      
+      <div class="mybar">
+        <ul class="nav nav-stacked">
+          <li><a href="documentation.html">Documentation</a></li>
+          <li><a href="chapter1.html">1. Example</a></li>
+          <li><a href="chapter2.html">2. Specifying security<br>experiments</a></li>
+          <li><a href="#">3. Proving security</a></li>
+          <li><a href="#sec1"><span class="subsection">goto</span></a></li>
+          <li><a href="#sec2"><span class="subsection">simplify</span></a></li>
+          <li><a href="#sec3"><span class="subsection">contradiction</span></a></li>
+          <li><a href="#sec4"><span class="subsection">coeff</span></a></li>
+          <li><a href="#sec5"><span class="subsection">extract_coeffs</span></a></li>
+          <li><a href="#sec6"><span class="subsection">simp_Coeff</span></a></li>
+          <li><a href="#sec7"><span class="subsection">case_distinction</span></a></li>
+          <li><a href="#sec8"><span class="subsection">split_in_factors</span></a></li>
+          <li><a href="#sec9"><span class="subsection">divide_by_param</span></a></li>
+          <li><a href="#sec10"><span class="subsection">assure_Laurent</span></a></li>
+          <!-- <li><a href="bibliography.html">Bibliography</a></li>-->
+        </ul>
+      </div>
+              
+    </div>  
+    <div class="col-md-9" id="mainCol">
+
+      <br>
+      <h2>3. Proving security</h2>
+      <br>
+      The tool
+      <span data-trigger="hover" data-toggle="popover" data-placement="bottom" style="color: #C762EF;"
+            data-content="For every forgery element (that the adversary must generate), the translation creates the
+                          corresponding linear combination consisting of all terms that can be involved. Then, the winning
+                          constraints introduce restrictions on these linear combinations.
+                          The translation invents parameter names if needed, the default
+                          name for new parameters consists of a 'p' followed by an integer, i.e.,
+                          p0, p1, p2, p3...">
+        translates</span>
+      the input file into constraints.
+      In particular, into Laurent polynomial equalities and inequalities.
+      To build a proof, we need to show that the constraints are not satisfiable.
+      There are rules to <i>simplify</i> the constraints, perform <i>case
+      distinctions</i> on the parameters and <i>derive contradictions</i>.
+      <br>
+      <br>
+      The following picture shows the proof strategy. The algorithm performs exhaustive case
+      distinctions in the parameters, building a proof tree and splitting up a problem into simpler sub-problems.
+      The goal is to find a contradiction in every leaf node, because this means that the original problem
+      is infeasible and implies the security of the correspondig cryptographic construction.
+      <img id="infty" src="img/chart2.svg" class="img-responsive center-block" style="margin-top: 20px;">
+      <br>
+      We describe how to use the available rules and give an intuition of how they work:
+      <div style="margin: 60px 0px 20px 20px">
+        <h3 id="sec1">goto</h3>
+        During a proof, due to case distinctions, the proof tree
+        may contain several open goals (unsolved leafs). This rule allows you to change the current working goal:
+        <pre><code>goto <span class="console-custom">n</span>.</code></pre>
+        where <i>n</i> must be an integer between $1$ and the number of open goals.
+      </div>
+
+      <div style="margin: 60px 0px 20px 20px">
+        <h3 id="sec2">simplify</h3>
+        This rule has no additional arguments:
+        <pre><code>simplify.</code></pre>
+        It simplifies the current working goal. Internally, it performs an abstraction of the system of equations
+        to get rid of $\forall$ and $\sum$ symbols, obtaining abstracted Laurent polynomials.
+        Later, it uses Gr&#246;bner Basis reductions to simplify these abstracted Laurent polynomials. Finally,
+        it undoes the abstraction, obtaining a simplified system of equations which is equivalent to the original one.
+        This algorithm also unifies the index variable names.
+        <br>
+        We show a small example of simplification:
+          $$
+          \begin{array}{ll}
+          \exists j_{1}. & \\
+          \sigma + \left( \sum_{j_{3} \not \in \{ j_{1}\}} \rho_{j_{1}}\cdot \rho'_{j_{3}} \right)= 0 & \land \\
+          \forall j_{2}\not \in \{ j_{1} \}. \rho_{j_{1}}\cdot \rho'_{j_{2}} = 0 & \\
+          \end{array}
+          \hspace{1cm} \longrightarrow \hspace{1cm} 
+          \begin{array}{ll}
+          \exists i. & \\
+          \sigma = 0 & \land \\
+          \forall j\not \in \{ i \}. \rho_{i}\cdot \rho'_{j} = 0 & \\
+          \end{array}
+          $$
+      </div>
+
+      <div style="margin: 60px 0px 20px 20px">
+        <h3 id="sec3">contradiction</h3>
+        This rule is used when a contradiction was found.
+        <pre><code>contradiction.</code></pre>
+        Every contradiction can be reduced to
+        $1=0$ or $0\neq 0$. If the current goal has been simplified to a contradiction,
+        this rule removes the goal from the goals list. Otherwise, an error message will be
+        shown while applying the rule.
+        If it was the last goal, this command finishes the proof.
+      </div>
+
+      <div style="margin: 60px 0px 20px 20px">
+        <h3 id="sec4">coeff</h3>
+        This rule exploits the fact that if a polynomial is equal to zero,
+        then when interpreting the polynomial as a polynomial over
+        <span id="uniform_variables" data-trigger="hover" data-toggle="popover" data-placement="top" style="color: #C762EF;"
+              data-content="Uniform variable are all the variables that are not Oracle inputs. As shown in Chapter 1,
+                            the adversary can create her queries combining the elements that she has access to. Therefore,
+                            Oracle input variables, also called 'handle variables', depend at the same time on
+                            other handle variables and uniform variables. Uniform variables are non recursive variables,
+                            so every polynomial can be seen as a polynomial over uniform variables.">
+          uniform variables</span>, the coefficients for all monomials must be zero.
+        The rule could be summarized as follows:
+        $$
+        \begin{array}{ll}
+        \dots & \land \\
+        {\cal E} = 0 & \land\\
+        \dots & \\        
+        \end{array}
+        \ \ \ \ \ \ \longrightarrow \ \ \ \ \ \
+        \begin{array}{ll}
+        \dots & \land\\
+        {\cal E} = 0 & \land\\
+        \forall i_{1},\dots,i_{k}. {\sf Coeff}_{\cal M}({\cal E}) = 0 & \land\\
+        \dots \\        
+        \end{array}
+        $$
+        It introduces a new equation, where the monomial ${\cal M}$ depends on index variables $i_{1},\dots,i_{k}$ and the expression
+        ${\cal E}$ does not contain any of these index variables. The syntax is the following:
+        <pre><code>coeff (<span class="console-custom">M</span>) <span class="console-custom">n</span>.</code></pre>
+        where $M$ is a monomial (containing only uniform variables) and <i>n</i> is an integer corresponding to the equation number in the system of equations.
+      </div>
+
+      <div style="margin: 60px 0px 20px 20px">
+        <h3 id="sec5">extract_coeffs</h3>
+        This rule has no additional arguments:
+        <pre><code>extract_coeffs.</code></pre>
+        It applies the previous rule to all possible equalities and all possible (and relevant) monomials.
+      </div>
+
+      <div style="margin: 60px 0px 20px 20px">
+        <h3 id="sec6">simp_Coeff</h3>
+        This rule is part of the <i>simplify</i> routine. It simplifies coeff expressions in the natural way. 
+        A simple example of its behaviour is the following:
+        $$
+          \begin{array}{lll}
+          1. & a\cdot X + b\cdot Y + c\cdot X\cdot Y = 0 & \\
+          \end{array}
+        $$
+        we apply <code>coeff (X*Y) 1.</code> and we get,
+        $$
+          \begin{array}{lll}
+          1. & a\cdot X + b\cdot Y + c\cdot X\cdot Y = 0 & \land \\
+          2. & {\sf Coeff}_{X\cdot Y}(a\cdot X + b\cdot Y + c\cdot X\cdot Y) = 0 & \\
+          \end{array}
+        $$
+        after <code>simp_Coeff.</code> we get
+        $$
+          \begin{array}{lll}
+          1. & a\cdot X + b\cdot Y + c\cdot X\cdot Y = 0 & \land \\
+          2. & c = 0 & \\
+          \end{array}
+        $$
+        In practice, this rule is more complicated due to the fact that the adversary may be adaptive.
+        As explained
+        <a href="#sec3" onClick="$(uniform_variables).mouseover();">above</a>,
+        we distinguish between <i>uniform variables</i> and <i>handle variables</i>. All variables in the experiment, but
+        Oracle inputs, are uniform variables. However, Oracle inputs must be instantiated (possibly in an adaptive
+        way) by the adversary. Oracle input variables (handle variables) and depend at the same time
+        on other handle variables (corresponding to earlier queries to the Oracle) and uniform variables. They
+        ultimately depend only on uniform variables, but, since the number of queries is not fixed, these relation
+        is not bounded.
+        <br>
+        Despite this issue, in some cases it is possible to prove that a particular handle variable does not
+        contain certain monomial. When this happens, it is possible to simplify a Coeff to $0$.
+      </div>
+
+      <div style="margin: 60px 0px 20px 20px">
+        <h3 id="sec7">case_distinction</h3>
+        This rule is used to perform case distinctions on the parameters. The syntax is:
+        <pre><code>case_distinction <span class="console-custom">p</span>.</code></pre>
+        where $p$ is a parameter.
+        <ul>
+          <li style="margin-top: 20px">
+            If it is a <i>non-indexed parameter</i> or an <i>indexed parameter</i> whose index is existentially
+            quantified, the current goal is divided into two different goals, where one of them includes the equation
+            $p = 0$ and the other one includes the equation $p \neq 0$.
+          </li>
+          <li style="margin-top: 20px">
+            If it is an <i>indexed parameter</i> whose index is <b>not</b> existentially
+            quantified, the current goal is divided into two different goals, where one of them includes the equation
+            $\forall i. p_{i} = 0$ and the other one includes the equation $p_{i^{*}} \neq 0$ where $i^{*}$ is a new
+            existentially quantified index variable.
+          </li>
+        </ul>
+      </div>
+
+      <div style="margin: 60px 0px 20px 20px">
+        <h3 id="sec8">split_in_factors</h3>
+        The syntax is:
+        <pre><code>split_in_factors <span class="console-custom">n</span>.</code></pre>
+        where $n$ is an integer, corresponding to the number of an equality equation.
+        If the left hand side of these equality (the right hand side is $0$) can be expressed as the 
+        product of more than one term, i.e. ${\cal E} = 0$ can be expressed as
+        ${\cal E_{1}}\cdot {\cal E_{2}}\cdots {\cal E}_{k} = 0$, then the current goal is divided
+        into $k$ goals where the $i$-th new goal replaces the mentioned equation by
+        ${\cal E}_{i} = 0$.
+      </div>
+
+      <div style="margin: 60px 0px 20px 20px">
+        <h3 id="sec9">divide_by_param</h3>
+        The syntax is:
+        <pre><code>divide_by_param <span class="console-custom">p</span>.</code></pre>
+        where $p$ is a parameter.
+        <br>
+        Under the assumption that a parameter is not null, we can divide by it. Therefore,
+        to apply this rule for parameter $p$, the equation $p \neq 0$ must appear in the system.
+        This rule applies division by $p$ in all equations where $p$ is a common factor of every term.
+        (All the rules are designed to avoid dealing with negative degree parameters).
+      </div>
+
+
+      <div style="margin: 60px 0px 20px 20px">
+        <h3 id="sec10">assure_Laurent</h3>
+        The syntax is:
+        <pre><code>assure_Laurent <span class="console-custom">n</span>.</code></pre>
+        where $n$ corresponds to an equation number. This rule exploits the fact that
+        a handle variable must be a Laurent polynomial on uniform variables to derive new
+        equations on the parameters.
+        <br>
+        As an example, let $X,Y$ be uniform variables and let $M$ be a handle variable. Let
+        $\sigma$ be a parameter.
+        The equation $X\cdot M + \sigma\cdot Y \cdot M + \sigma - 1 = 0$ is equivalent to
+        $$ M = \frac{1-\sigma}{X+\sigma \cdot Y} $$
+        and asuming that $M$ must be a Laurent polynomial, we can derive new equations on $\sigma$.
+        In particular, in this case we have $\sigma = 0 \ \lor \ \sigma = 1$. Otherwise $M$ is a rational
+        expression different from a Laurent polynomial.
+      </div>
+
+
+      <br>
+      <br>
+      <div class="col-md-6">
+        <a href="chapter2.html">
+          <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+          2. Specifying security
+        </a>
+      </div>
+      <div class="col-md-6" align="right">
+        <!--<a href="bibliography.html">
+          Bibliography
+          <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+        </a>
+      </div>-->
+      <br><br><br><br>
+
+    </div>
+</div>
+
+  <script type="text/javascript" src="js/jquery-1.10.1.min.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="js/scripts.js"></script>
+
+  <script>
+    $("[data-toggle=popover]")
+    .popover({html:true})
+  </script>
+
+</body>
+
+</html>
